@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- ▼ ページのタイトルと説明文（検索結果やSNSで表示されます） -->
+<title>AIで、どこまで作れる？｜未経験の会社員によるLP制作検証</title>
+<meta name="description" content="HP制作未経験の会社員が、生成AIを使って0からLPを作ってみた検証記録。">
+<style>
+/* ============================================
+   ▼ 色・文字・余白の設定（ここを変えると全体が変わります）
+   ============================================ */
+:root{
+  --ink:#141414;        /* 文字色（黒） */
+  --paper:#ffffff;      /* 背景色（白） */
+  --gray-1:#f4f4f2;     /* 薄いグレー（背景の区切り用） */
+  --gray-2:#d9d9d6;     /* 線の色 */
+  --gray-3:#6f6f6b;     /* 補足文字のグレー */
+  --max:960px;          /* ページの最大幅 */
+  --gap:clamp(80px,12vw,136px); /* セクション間の余白 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",Meiryo,sans-serif;
+  color:var(--ink);background:var(--paper);
+  line-height:1.9;font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+section{padding:var(--gap) 0 0}
+
+/* 見出し */
+h2{font-size:clamp(25px,4.4vw,36px);line-height:1.45;font-weight:700;letter-spacing:.02em;margin-bottom:24px}
+.lead{max-width:36em;color:var(--gray-3)}
+.sec-head{border-top:1px solid var(--ink);padding-top:26px;margin-bottom:48px}
+.sec-head .tag{font-size:13px;color:var(--gray-3);letter-spacing:.06em;margin-bottom:10px}
+
+/* ============ 1. ファーストビュー ============ */
+/* ▼ 高さは min-height、文字サイズは h1 の font-size で調整できます */
+.hero{min-height:80vh;min-height:80svh;max-height:780px;display:flex;flex-direction:column;justify-content:space-between;padding:28px 0 48px}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--gray-3)}
+.status{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gray-2);border-radius:999px;padding:4px 14px;color:var(--ink);white-space:nowrap}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--ink);animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.2}} /* 検証中ランプの点滅（これだけが動きます） */
+.hero h1{font-size:clamp(40px,9vw,84px);line-height:1.2;font-weight:800;letter-spacing:-.01em;margin-bottom:26px}
+.hero p{font-size:clamp(16px,2vw,19px);max-width:28em}
+.hero .me{font-size:14px;color:var(--gray-3);margin-top:22px}
+.scroll{font-size:13px;color:var(--gray-3);margin-top:40px}
+
+/* ============ 2. この検証について ============ */
+.conds{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--gray-2)}
+.conds li{padding:24px 0;border-bottom:1px solid var(--gray-2);font-weight:700;font-size:18px}
+.conds li:nth-child(odd){padding-right:24px}
+.conds li small{display:block;font-weight:400;color:var(--gray-3);font-size:14px;margin-top:2px}
+
+/* ============ 3. 制作の流れ ============ */
+.steps{list-style:none}
+.steps li{display:grid;grid-template-columns:110px 1fr auto;gap:24px;padding:26px 0;border-top:1px solid var(--gray-2);align-items:start}
+.steps li:last-child{border-bottom:1px solid var(--gray-2)}
+.steps .no{font-size:13px;color:var(--gray-3);letter-spacing:.06em;padding-top:5px}
+.steps .no b{display:block;font-size:30px;color:var(--ink);line-height:1.2;letter-spacing:0}
+.steps h3{font-size:19px;margin-bottom:4px}
+.steps p{color:var(--gray-3);font-size:15px}
+/* 進み具合のラベル（完了＝黒枠、これから＝点線） */
+.badge{font-size:12px;border:1px solid var(--ink);border-radius:999px;padding:2px 12px;white-space:nowrap;margin-top:6px}
+.badge.todo{border:1px dashed var(--gray-3);color:var(--gray-3)}
+
+/* ============ 4. 完成したLP ============ */
+.proof{background:var(--ink);color:var(--paper);padding:clamp(40px,8vw,88px) clamp(24px,6vw,72px)}
+.proof h2{margin-bottom:20px}
+.proof p{color:#bdbdb8;max-width:34em}
+
+/* ============ 5. 検証結果 ============ */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{border:1px solid var(--gray-2);padding:28px 24px;background:var(--paper)}
+.card .label{font-size:14px;color:var(--gray-3);margin-bottom:14px}
+.card .val{font-size:clamp(26px,3.4vw,32px);font-weight:700;line-height:1.4}
+.card .val.pending{color:var(--gray-3)} /* 「検証中」のときの色。確定したら class から pending を消す */
+.card .note{font-size:13px;color:var(--gray-3);margin-top:10px}
+
+/* ============ 6. 使用したツール ============ */
+.tools{list-style:none;border-top:1px solid var(--ink)}
+.tool{display:grid;grid-template-columns:150px 1fr auto;gap:8px 28px;padding:28px 0;border-bottom:1px solid var(--gray-2);align-items:start}
+.tool h3{font-size:20px;line-height:1.5}
+.tool .why{font-size:17px;font-weight:700;line-height:1.7}
+.tool .why small{display:block;font-size:13px;font-weight:400;color:var(--gray-3);margin-bottom:2px}
+.tool .how{grid-column:2;font-size:14px;color:var(--gray-3)}
+.tool a{text-decoration:none} /* 将来リンクを付けたときの見た目 */
+.tool.planned h3,.tool.planned .why{color:var(--gray-3)}
+
+/* ============ 7. 分かったこと ============ */
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.notes h3{font-size:17px;padding-bottom:12px;border-bottom:1px solid var(--ink);margin-bottom:16px}
+.notes ul{list-style:none}
+.notes li{font-size:15px;padding:10px 0;border-bottom:1px solid var(--gray-2)}
+.notes .more{color:var(--gray-3);font-size:14px}
+.memo{margin-top:36px;font-size:14px;color:var(--gray-3)}
+
+/* ============ 8. Xへの導線 ============ */
+.cta{border:1px solid var(--ink);padding:clamp(40px,8vw,88px) clamp(24px,6vw,72px)}
+.cta h2{margin-bottom:14px}
+.cta .lead{margin-bottom:32px}
+.cta-list{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:0 32px;border-top:1px solid var(--gray-2);margin-bottom:40px}
+.cta-list li{padding:14px 0;border-bottom:1px solid var(--gray-2);font-size:15px}
+.cta-name{font-size:14px;color:var(--gray-3);margin-bottom:16px}
+.cta-name b{display:block;color:var(--ink);font-size:17px}
+.btn{display:inline-block;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:700;padding:16px 36px;border:1px solid var(--ink);transition:background .2s,color .2s}
+.btn:hover{background:var(--paper);color:var(--ink)}
+
+/* ============ 9. フッター ============ */
+footer{margin-top:var(--gap);border-top:1px solid var(--gray-2);padding:40px 0 56px;font-size:13px;color:var(--gray-3)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ============ スマホ対応 ============ */
+@media (max-width:720px){
+  .hero{min-height:74svh;max-height:none}
+  .conds,.cards,.notes,.cta-list{grid-template-columns:1fr}
+  .conds li:nth-child(odd){padding-right:0}
+  .notes{gap:32px}
+  .steps li{grid-template-columns:70px 1fr;gap:6px 12px}
+  .steps .badge{grid-column:2;justify-self:start;margin-top:0}
+  .tool{grid-template-columns:1fr;gap:6px}
+  .tool .how{grid-column:1}
+  .btn{display:block;text-align:center;padding:16px 20px}
+}
+/* 動きを減らす設定の人にはアニメーションを止める */
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. ファーストビュー ============ -->
+<header class="wrap hero">
+  <div class="hero-top">
+    <!-- ▼ Xの表示名とID -->
+    <span>ひかる｜AIで副収入つくれるか　@hikarulifestyl</span>
+    <!-- ▼ 検証が終わったら「検証中」を「検証完了」などに変えてください -->
+    <span class="status"><i></i>検証中</span>
+  </div>
+  <div>
+    <h1>AIで、<br>どこまで作れる？</h1>
+    <p>HP制作未経験の会社員が、生成AIを使って0からLPを作ってみた。</p>
+    <p class="me">これは、その途中経過と結果の記録です。</p>
+    <p class="scroll">下へスクロールして、記録を見る</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 2. この検証について ============ -->
+<section id="about">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">この検証について</div>
+      <h2>未経験の会社員が、<br>どこまでやれるのか試しています。</h2>
+      <!-- ▼ 自己紹介の文章。ご自身の言葉に直すと、より「実体験」らしくなります -->
+      <p class="lead">会社員をしながら、AIで副収入をつくれるのかを検証しています。その第一歩として、まずはLPを1ページ作ってみました。次の条件で始めています。</p>
+    </div>
+    <ul class="conds">
+      <li>Web制作経験なし<small>HTMLもCSSも触ったことがない状態から</small></li>
+      <li>できるだけ無料<small>有料ツールに頼らず進める</small></li>
+      <li>生成AIを活用<small>コードはAIと対話しながら作る</small></li>
+      <li>専門知識なし<small>わからないことはAIに質問する</small></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 3. 制作の流れ ============ -->
+<section id="flow">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">制作の流れ</div>
+      <h2>0から公開までの6ステップ</h2>
+      <p class="lead">進み具合は、右のラベルで分かるようにしています。</p>
+    </div>
+    <!-- ▼ ステップが終わったら class="badge todo" を class="badge" にし、文字を「完了」に変更 -->
+    <ol class="steps">
+      <li><div class="no">STEP<b>01</b></div><div><h3>企画</h3><p>何のページを作るか、誰に向けるかを決める。</p></div><span class="badge">完了</span></li>
+      <li><div class="no">STEP<b>02</b></div><div><h3>VS Code導入</h3><p>無料のエディタをインストールして作業環境を用意。</p></div><span class="badge">完了</span></li>
+      <li><div class="no">STEP<b>03</b></div><div><h3>AIでコード生成</h3><p>やりたいことを文章で伝え、コードを書いてもらう。</p></div><span class="badge">完了</span></li>
+      <li><div class="no">STEP<b>04</b></div><div><h3>ブラウザで確認</h3><p>できたファイルをブラウザで開き、見た目をチェック。</p></div><span class="badge">完了</span></li>
+      <li><div class="no">STEP<b>05</b></div><div><h3>修正</h3><p>気になる点をAIに伝えて、直しては確認を繰り返す。</p></div><span class="badge">進行中</span></li>
+      <li><div class="no">STEP<b>06</b></div><div><h3>ネット公開</h3><p>誰でも見られるようにインターネット上へ公開。</p></div><span class="badge todo">これから</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ 4. 完成したLP ============ -->
+<section id="result">
+  <div class="wrap">
+    <div class="proof">
+      <h2>今見ているこのページが、<br>成果物です。</h2>
+      <p>このページは、AIと一緒に制作しました。文章の構成もデザインもコードも、すべて対話しながら作った実物です。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. 検証結果 ============ -->
+<section id="data">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">検証結果（現時点）</div>
+      <h2>実際にかかった時間と費用</h2>
+      <p class="lead">公開までの作業が進んだら、数字を更新していきます。</p>
+    </div>
+    <!-- ▼ 数字を更新するときは、<div class="val"> の中身を書き換えてください -->
+    <div class="cards">
+      <div class="card"><div class="label">制作時間</div><div class="val">約40〜50分</div><div class="note">初版が形になるまで</div></div>
+      <div class="card"><div class="label">かかった費用</div><div class="val">0円</div><div class="note">現時点。公開時に変わる場合は更新します</div></div>
+      <div class="card"><div class="label">使用したAI</div><div class="val">ChatGPT / Claude</div><div class="note">役割はこの下に書いています</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. 使用したツール ============ -->
+<section id="tools">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">使用したツール</div>
+      <h2>どのツールを、何のために使ったか</h2>
+    </div>
+    <!-- ▼ ツールを増やすときは <li> をコピー。
+         リンクを付けるときは <h3>ChatGPT</h3> を
+         <h3><a href="リンクURL" target="_blank" rel="noopener">ChatGPT</a></h3> に変更 -->
+    <ul class="tools">
+      <li class="tool">
+        <h3>ChatGPT</h3>
+        <div class="why"><small>何のために使った？</small>LPの考え方を整理するため</div>
+        <span class="badge">使用済み</span>
+        <p class="how">企画、構成、制作方針、改善点の整理に使用。</p>
+      </li>
+      <li class="tool">
+        <h3>Claude</h3>
+        <div class="why"><small>何のために使った？</small>ページのコードを書いてもらうため</div>
+        <span class="badge">使用済み</span>
+        <p class="how">HTML・CSS・JavaScriptのコード生成に使用。</p>
+      </li>
+      <li class="tool">
+        <h3>VS Code</h3>
+        <div class="why"><small>何のために使った？</small>コードを保存して編集するため</div>
+        <span class="badge">使用済み</span>
+        <p class="how">AIが作ったコードを貼り付けて、保存・編集する場所として使用。</p>
+      </li>
+      <!-- GitHubは未使用。使い始めたら class から planned を消し、badge を「使用済み」に変更 -->
+      <li class="tool planned">
+        <h3>GitHub</h3>
+        <div class="why"><small>何のために使う予定？</small>完成したページをネットに公開するため</div>
+        <span class="badge todo">公開時に使用予定</span>
+        <p class="how">まだ使っていません。ネット公開の段階で使う予定です。</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 7. 実際にやって分かったこと ============ -->
+<section id="learned">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">実際にやって分かったこと</div>
+      <h2>良かったことも、<br>うまくいかなかったことも。</h2>
+      <p class="lead">今の時点での感想です。作業が進むたびに追記します。</p>
+    </div>
+    <!-- ▼ 気づきが増えたら <li> をコピーして追加 -->
+    <div class="notes">
+      <div><h3>良かった点</h3><ul>
+        <li>コードを書けなくても、AIへの指示だけで想像以上の形になった。</li>
+        <li class="more">（今後追記）</li></ul></div>
+      <div><h3>難しかったところ</h3><ul>
+        <li>専門用語が分からず、最初は何を操作すればいいのか分からなかった。</li>
+        <li class="more">（今後追記）</li></ul></div>
+      <div><h3>AIだけでは上手くいかなかったところ</h3><ul>
+        <li>作ることはできても、何を直すべきかの判断には人の目が必要だった。</li>
+        <li class="more">（今後追記）</li></ul></div>
+    </div>
+    <p class="memo">※ 現段階の仮の感想です。検証が進んだら書き直す場合があります。</p>
+  </div>
+</section>
+
+<!-- ============ 8. Xへの導線 ============ -->
+<section id="x">
+  <div class="wrap">
+    <div class="cta">
+      <h2>この検証の過程も、<br>Xで公開しています。</h2>
+      <p class="lead">このページに載せているのは、ほんの一部です。うまくいかなかったことも含めて、途中の記録をXに残しています。</p>
+      <ul class="cta-list">
+        <li>完成までの修正のやりとり</li>
+        <li>うまくいかなかったところ</li>
+        <li>実際にかかった時間や費用</li>
+        <li>AI副業の検証の経過</li>
+      </ul>
+      <p class="cta-name"><b>ひかる｜AIで副収入つくれるか</b>@hikarulifestyl</p>
+      <!-- ▼ href="#" を、あなたのXプロフィールURLに変更してください -->
+      <a class="btn" href="#" target="_blank" rel="noopener">Xで検証の記録を見る</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ 9. フッター ============ -->
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> ひかる｜AIで副収入つくれるか（@hikarulifestyl）</span>
+    <span>生成AIを使った制作検証の記録</span>
+  </div>
+</footer>
+
+<script>
+/* フッターの年を自動で今年にする（変更不要） */
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
